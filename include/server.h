@@ -1,5 +1,6 @@
 #pragma once
-
+#include "future.h"
+#include "server_socket.h"
 #include <atomic>
 class ServerApplication;
 class ThreadPool;

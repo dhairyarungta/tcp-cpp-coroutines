@@ -1,5 +1,7 @@
 #pragma once
 #include<atomic>
+#include <memory>
+#include "future.h"
 
 class IoEventMonitor;
 class IoEventListener;
@@ -18,4 +20,4 @@ public :
     ServerSocket(short port,IoEventMonitor& io_monitor);
     AwaitableValue<std::shared_ptr<Socket>> accept_conn();
     void close_socket();
-}
+};

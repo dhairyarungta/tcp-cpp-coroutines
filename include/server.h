@@ -1,5 +1,6 @@
 #pragma once
 
+#include <atomic>
 class ServerApplication;
 class ThreadPool;
 class IoEventMonitor;

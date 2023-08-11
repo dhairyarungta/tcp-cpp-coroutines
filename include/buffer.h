@@ -1,5 +1,5 @@
 #pragma once
-#inclue <cstddef>
+#include <cstddef>
 
 
 struct IOChunk
@@ -27,7 +27,7 @@ public:
     void increment_read_pointer(long long size);
     void increment_write_pointer(long long size);
     void read(std::byte* dest, long long size);
-    void write (cost std:::byte*src, long long size);
+    void write (const std::byte*src, long long size);
     long long get_total_capacity();
     long long get_total_remaining();
-}
+};

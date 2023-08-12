@@ -74,13 +74,31 @@ void ByteBuffer::read(std::byte* dest, long long size)
     while (size>0)
     {
         IOChunk chunk = get_read_chunk();
+        long long read_size = std::min(size, chunk.size);
+        std::memcpy(dest,chunk.data, read_size);
+        size-=read_size;
+        dest+=read_size;
+        increment_read_pointer(read_size);
+        
     }
     
 }
 
-void ByteBuffer::write(std::byte* srcdest, long long)
+void ByteBuffer::write(const std::byte* src, long long size)
 {
-
+    if(size>get_total_capacity())
+    {
+        throw std::runtime_error("ByteBUffer::write error: Write size more than capacity");
+    }
+    while(size>0)
+    {
+        IOChunk chunk = get_write_chunk();
+        long long write_size = std::min(size, chunk.size);
+        std::memcpy(chunk.data,src,write_size);
+        size-=write_size;
+        src+=write_size;
+    increment_write_pointer(write_size);
+    }
 }
 
 void ByteBuffer::increment_read_pointer(long long size )

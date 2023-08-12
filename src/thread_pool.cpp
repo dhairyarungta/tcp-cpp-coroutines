@@ -24,30 +24,50 @@ void ThreadPool::run_jobs()
     while(true)
     {
         std::function<void()>job;
+        
         {
-
+            std::unique_lock<std::mutex>jobs_lock(jobs_mutex);
+            jobs_condition.wait(jobs_lock, [&]{return !jobs.empty()||is_shutdown;});
+            if(jobs.empty()&& is_shutdown)
+            {
+                return;
+            }
+            job = jobs.front();
+            jobs.pop();
         }
+        try
+        {
+            jobs();
+        }
+        catch(std::runtime_error err)
+        {
+            std::cerr << err.what() << std::endl;
+        }
+        
     }
 }
 
 void ThreadPool::run(std::function<void()>job)
 {
     {
-        std::lock_guard<std::mutex> guard(job_mutex);
+        std::lock_guard<std::mutex> guard(jobs_mutex);
         if(is_shutdown)
         {
             throw std::runtime_error("ThreadPool::run() error: ThreadPool already shutdown");
-
         }
         jobs.push(job);
-
+        if(threads.size()<max_threads)
+        {
+            threads.push_back(std::thread(&(ThreadPool::run_jobs),this));
+        }
     }
+    jobs_condition.notify_one();
 }
 
 
 void ThreadPool::run(std::coroutine_handle<>handle)
 {
-
+    run([&,handle](){handle.resume();});
 }
 
 void ThreadPool::shutdown()
@@ -62,7 +82,7 @@ void ThreadPool::shutdown()
         is_shutdown = true;
     }
     jobs_condition.notify_all();
-    for(auto it= threads.begin();it!=thread.end();++it)
+    for(auto it= threads.begin();it!=threads.end();++it)
     {
         it->join();
     }

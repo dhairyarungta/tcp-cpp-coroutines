@@ -31,16 +31,26 @@ bool ByteBuffer::has_wrap_around()
     
 }
 
-
-long long ByteBuffer::get_total_capacity()
+IOChunk ByteBuffer::get_write_chunk()
 {
-    return max_capacity- get_total_remaining();
+    long long write_index = get_index(write_p);
+    if(has_wrap_around())
+    {
+        return {data+write_index , get_index(read_p)-write_index};
+    }
+    return {data+write_index, max_capacity-write_index};
 }
 
-long long ByteBuffer::get_total_remaining()
+IOChunk ByteBuffer::get_read_chunk()
 {
-    return write_p-read_p;
+    long long read_index = get_index(read_p);
+    if(!has_wrap_around())
+    {
+        return {data+read_index, write_p-read_p};
+    }
+    return {data+read_index, max_capacity-read_index};
 }
+
 
 
 void ByteBuffer::increment_read_pointer(long long size)
@@ -55,7 +65,17 @@ void ByteBuffer::increment_read_pointer(long long size)
 
 void ByteBuffer::read(std::byte* dest, long long size)
 {
+    if(size>get_total_remaining())
+    {
+        throw std::runtime_error("ByteBuffer::read error: Read size more than remaining");
 
+    }
+    
+    while (size>0)
+    {
+        IOChunk chunk = get_read_chunk();
+    }
+    
 }
 
 void ByteBuffer::write(std::byte* srcdest, long long)
@@ -65,15 +85,25 @@ void ByteBuffer::write(std::byte* srcdest, long long)
 
 void ByteBuffer::increment_read_pointer(long long size )
 {
+    if(size>get_total_remaining())
+    {
+        throw std::runtime_error("ByteBuffer::increment_read_pointer error: More than remaining");
+    }
+    read_p+=size;
+    if(read_p>max_capacity && write_p>max_capacity)
+    {
+        write_p-=max_capacity;
+        read_p-=max_capacity;
 
+    }
 }
 
-IOChunk ByteBuffer::get_write_chunk()
+long long ByteBuffer::get_total_capacity()
 {
-
+    return max_capacity- get_total_remaining();
 }
 
-IOChunk ByteBuffer::get_read_chunk()
+long long ByteBuffer::get_total_remaining()
 {
-    
+    return write_p-read_p;
 }

@@ -37,7 +37,7 @@ void ThreadPool::run_jobs()
         }
         try
         {
-            jobs();
+            job();
         }
         catch(std::runtime_error err)
         {

@@ -11,7 +11,7 @@
 #include <functional>
 #include <stdexcept>
 #include<iostream>
-#include 
+
 
 class ThreadPool
 {
@@ -49,7 +49,7 @@ inline ThreadPool::ThreadPool(size_t threads) : stop(false)
                         this->condition.wait(lock,
                         [this]{return this->stop||!this->tasks.empty();});
 
-                        if(this->stop && this->empty())
+                        if(this->stop && this->tasks.empty())
                             return;
                         
                         task = std::move(this->tasks.front());

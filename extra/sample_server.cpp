@@ -5,6 +5,7 @@
 #include <netinet/in.h>
 #include <sys/epoll.h>
 #include <experimental/coroutine>
+#include <errno.h>
 
 template <typename T>
 struct promise_type;
@@ -132,17 +133,74 @@ private:
 
     void acceptClient(int serverSocket,int epollFd)
     {
+        sockaddr_in clientAddr;
+        socklen_t  clientAddrLen; = sizeof(clientAddr);
 
-    }
+        int clientSocket = accept4(serverSocket,reinterpret_cast<sockaddr*>(&clientAddr),&clientAddrLen, SOCK_NONBLOCK);
+        if (clientSocket==-1)
+        {
+            std::cerr << "Error accepting client connection" << std::endl;
+            return;
+     
+        }
+
+        epoll_event event;
+        event.events = EPOLLIN;
+        event.data.fd = clientSocket;
+        if(epoll_ctl(epollFd, EPOLL_CTL_ADD, clientSocket, &event) == -1)
+        {
+            std::cerr << "Error adding client socket to epoll" << std::endl;
+            close(clientSocket);
+            return;
+
+        }
+        handleClient(clientSocket);
+    }   
 
     void handleClient(int clientSocket)
     {
+        while(true)
+        {
+            char buffer[1024];
+            int bytesRead = read(clientSocket, buffer, sizeof(buffer));
+            if(bytesRead ==-1)
+            {
+                if(errno ==EAGAIN || errno ==EWOULDBLOCK)
+                {
+                    break;
+                }else 
+                {
+                    std::cerr << "Error reading from client socket" << std::endl;
+                    break;
+                  
+                }
+            }else if (bytesRead ==0)
+            {
+                break;	
+                //connection ended
+            } else
+            {
+                std::cout << "Received: " << buffer << std::endl;
 
+                // Simulate asynchronous processing using coroutines
+                asyncProcess(clientSocket, buffer, bytesRead);
+
+            }
+        }
+
+
+        close (clientSocket);
     }
 
     void asynProcess(int clientSocket, const char*data, int size)
     {
 
+        coro_t coro = async_sleep(2);
+        whiel(!coro.done());
+        {
+            coro.resume();
+        }
+        send(clientSocket, data, size, 0);
     }
 
 };

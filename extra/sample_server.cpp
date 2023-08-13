@@ -56,10 +56,40 @@ public:
         int serverSocket = createServerSocket();
         int epollFd = epoll_create1(0);
         if(epollFd ==-1)
+        {
+            std::cerr << "Error creating epoll" << std::endl;
+            return 1;
+
+        }
+        epoll_event event ;
+        event.events = EPOLLIN;
+        event.data.fd = serverSocket;
+        if(epoll_ctl(epollFd, EPOLL_CTL_ADD, serverSocket,&event) == -1)
+        {
+            std::cerr<<"Error adding server socket to epoll"<<std::endl;
+            return 1;
+
+        }
+
+        while(true)
+        {
+            epoll_event events[10];
+            int readyCount = epoll_wait(epollFd, events,10,-1);
+            for(int i =0;i<readyCount;i++)
+            {
+                if(events[i].data.fd==serverSocket)
+                {
+                    acceptClient(serverSocket,epollFd);
+                }
+            }
+        }
+        close (serverSocket);
+        return 0;
     }
 
 
 private:
+    //port number attribute
     int port_;
 
     int createServerSocket()
@@ -106,6 +136,11 @@ private:
     }
 
     void handleClient(int clientSocket)
+    {
+
+    }
+
+    void asynProcess(int clientSocket, const char*data, int size)
     {
 
     }

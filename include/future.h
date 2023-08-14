@@ -148,7 +148,7 @@ struct AwaitableValue
         coro_handle.promise().waiting = handle;
     }
 
-    T&& await_resume 
+    T&& await_resume ()
     {
         promise_type promise = coro_handle.promise();
         if(promise.exception)

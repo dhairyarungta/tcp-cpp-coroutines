@@ -50,16 +50,30 @@ IoEventListener* IoEventMonitor::register_fd(int fd)
     auto listener_p = listener.get();
     {
         std::lock_guard<std::mutex> guard(fd_mutex);
-        fd_listener_map.erase(fd);
+        fd_listener_map[fd]= std::move(listener);
     }
+    return listener_p;
 }
 
 void IoEventMonitor::remove_fd(int fd)
 {
-
-}
+    std::lock_guard<std::mutex> guard(fd_mutex);
+    fd_listener_map.erase(fd);
+}   
 void IoEventMonitor::trigger_event(epoll_event*events, int count)
 {
-    
+    std::lock_guard<std::mutex> guard(fd_mutex);
+    for (int i = 0;i<count;++i)
+    {
+        epoll_event* event = *(events + i);
+        auto it = fd_listener_map.fid(event.data.fd);
+        if(it==fd_listener_map.end()) 
+        {
+            continue;
+        }
+        bool can_read = (event.events & EPOLLIN)==EPOLLIN;
+        bool can_write = (event.events & EPOLLOUT)==EPOLLOUT;
+        it->second->on_event(can_read, can_write);
+    }
 }
 

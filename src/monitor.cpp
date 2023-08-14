@@ -60,13 +60,13 @@ void IoEventMonitor::remove_fd(int fd)
     std::lock_guard<std::mutex> guard(fd_mutex);
     fd_listener_map.erase(fd);
 }   
-void IoEventMonitor::trigger_event(epoll_event*events, int count)
+void IoEventMonitor::trigger_events(epoll_event*events, int count)
 {
     std::lock_guard<std::mutex> guard(fd_mutex);
     for (int i = 0;i<count;++i)
     {
         epoll_event* event = *(events + i);
-        auto it = fd_listener_map.fid(event.data.fd);
+        auto it = fd_listener_map.find(event.data.fd);
         if(it==fd_listener_map.end()) 
         {
             continue;

@@ -36,7 +36,7 @@ struct AwaitableFuture
 
             std::coroutine_handle<> await_suspend(std::coroutine_handle<promise_type>)noexcept
             {
-                auto waiting = hanlde.promise().waitings();
+                auto waiting = hanlde.promise().waiting;
                 if(waiting)
                 {
                     return waiting;

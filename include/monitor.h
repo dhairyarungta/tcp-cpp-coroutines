@@ -31,4 +31,4 @@ public:
     void shutdown();
     IoEventListener* register_fd(int fd);
     void remove_fd(int fd);
-}
+};

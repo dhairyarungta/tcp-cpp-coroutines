@@ -27,7 +27,7 @@ bool ByteBuffer::has_wrap_around()
 {
     long long quotient_w = write_p/max_capacity;
     long long quotient_r = read_p/max_capacity;
-    return quotient_w>quotient_r && read_p > (quotient_r*max_capacity);
+    return quotient_w>quotient_r ;//&& read_p > (quotient_r*max_capacity);
     
 }
 
@@ -51,13 +51,27 @@ IOChunk ByteBuffer::get_read_chunk()
     return {data+read_index, max_capacity-read_index};
 }
 
+void ByteBuffer::increment_read_pointer(long long size )
+{
+    if(size>get_total_remaining())
+    {
+        throw std::runtime_error("ByteBuffer::increment_read_pointer error: More than remaining");
+    }
+    read_p+=size;
+    if(read_p>max_capacity && write_p>max_capacity)
+    {
+        write_p-=max_capacity;
+        read_p-=max_capacity;
+
+    }
+}
 
 
 void ByteBuffer::increment_write_pointer(long long size)
 {
     if(size>get_total_capacity())
     {
-        throw std::runtime_error("ByteBuffer::increment_read_pointer error: More than capacity");
+        throw std::runtime_error("ByteBuffer::increment_write_pointer error: More than capacity");
 
     }
     write_p+=size;
@@ -88,7 +102,7 @@ void ByteBuffer::write(const std::byte* src, long long size)
 {
     if(size>get_total_capacity())
     {
-        throw std::runtime_error("ByteBUffer::write error: Write size more than capacity");
+        throw std::runtime_error("ByteBuffer::write error: Write size more than capacity");
     }
     while(size>0)
     {
@@ -101,20 +115,6 @@ void ByteBuffer::write(const std::byte* src, long long size)
     }
 }
 
-void ByteBuffer::increment_read_pointer(long long size )
-{
-    if(size>get_total_remaining())
-    {
-        throw std::runtime_error("ByteBuffer::increment_read_pointer error: More than remaining");
-    }
-    read_p+=size;
-    if(read_p>max_capacity && write_p>max_capacity)
-    {
-        write_p-=max_capacity;
-        read_p-=max_capacity;
-
-    }
-}
 
 long long ByteBuffer::get_total_capacity()
 {

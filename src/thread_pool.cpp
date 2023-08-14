@@ -8,16 +8,12 @@
 
 
 ThreadPool::ThreadPool()
-    :max_threads(std::thread::hardware_concurrency())
-{
-    is_shutdown = false;
-}
+    :max_threads(std::thread::hardware_concurrency()), is_shutdown(false)
+{}
 
 ThreadPool::ThreadPool(int max_threads)
-    :max_threads(max_threads)
-{
-    is_shutdown = false;
-}
+    :max_threads(max_threads), is_shutdown(false)
+{}
 
 void ThreadPool::run_jobs()
 {
@@ -58,7 +54,8 @@ void ThreadPool::run(std::function<void()>job)
         jobs.push(job);
         if(threads.size()<max_threads)
         {
-            threads.push_back(std::thread(&(ThreadPool::run_jobs),this));
+            threads.push_back(std::thread(&ThreadPool::run_jobs,this));
+            //thread = operator moves the thread (move semantics)
         }
     }
     jobs_condition.notify_one();
@@ -87,3 +84,4 @@ void ThreadPool::shutdown()
         it->join();
     }
 }
+

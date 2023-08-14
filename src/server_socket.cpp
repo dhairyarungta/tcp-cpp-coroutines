@@ -30,7 +30,17 @@ ServerSocket::ServerSocket(short port, IoEventMonitor& io_monitor)
 {
     addrinfo* info = get_local_addrinfo(port);
     socket_fd = socket(info->ai_family, info->ai_socktype, info->ai_protocol);
-
+    throw_errno(socket_fd, "ServerSocket socket()");
+    int status = bind(socket_fd, info->ai_addr, info->ai_addrlen);
+    freeaddrinfo(info);
+    throw_errno(status, "ServerSocket bind()");
+    int yes = 1;
+    status = setsocketopt(socket_fd, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof yes);
+    throw_errno(status, "ServerSocket setsocketopt()");
+    set_non_blocking_socket(socket_fd);
+    status = listen(socket_fd,10);
+    throw_errno(status, "Server listen()");
+    io_listener = io_monitor.register_fd(socket_fd);    
 }
 
 AwaitableValue<std::shared_ptr<Socket>> ServerSocket::accept_conn()
@@ -52,7 +62,7 @@ AwaitableValue<std::shared_ptr<Socket>> ServerSocket::accept_conn()
         co_await io_listener->await_read();
     }
     set_non_blocking_socket(details.socket_fd);
-    co_return std::make_shared<Socket>(details, )
+    co_return std::make_shared<Socket>(details, io_monitor);
 }
 
 

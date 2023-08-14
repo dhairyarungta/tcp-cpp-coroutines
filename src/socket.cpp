@@ -37,6 +37,21 @@ AwaitableValue<long long> Socket::read(std::byte* dest, long long size, bool rea
 {
 
 }
+AwaitableValue<long long> Socket::skip(long long size, bool skip_fully)
+{
+    long long total_skipped 
+}
+
+void Socket::write_availble(const std::byte*& src, long long &size)
+{
+
+}
+
+
+AwaitableFuture Socket::write(const std::byte*src, long long size)
+{
+
+}
 
 AwaitableFuture Socket::flush()
 {

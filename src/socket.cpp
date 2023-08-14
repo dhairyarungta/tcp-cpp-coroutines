@@ -77,7 +77,30 @@ void Socket::skip_available(long long &size, long long &total_skipped)
 AwaitableValue<long long> Socket::skip(long long size, bool skip_fully)
 {
     long long total_skipped =0;
-    
+    skip_available(size, total_skipped);
+    while(size>0)
+    {
+        SocketOperation status = stream.recv_from_socket(input_buffer);
+        skip_available(size, total_skipped);
+        if(size==0 || status==SOCKET_OP_SUCCESS)
+        {
+            continue;
+        }
+        if(status==SOCKET_OP_BLOCK)
+        {
+            co_await io_listener->await_read();
+        }else if(status==SOCKET_OP_CLOSE)
+        {
+            if(skip_fully)
+            {
+                throw std::runtime_error("Socket skip() : Socket has been closed");
+            }
+        }
+        break;
+
+    }
+    co_return total_skipped;
+
 }
 
 void Socket::write_availble(const std::byte*& src, long long &size)
@@ -96,7 +119,24 @@ void Socket::write_availble(const std::byte*& src, long long &size)
 
 AwaitableFuture Socket::write(const std::byte*src, long long size)
 {
+    write_availble(src, size);
+    while(size>0)
+    {
+        SocketOperation status = stream.send_to_socket(output_buffer);
+        write_availble(src, size);
+        if(size==0||status==SOCKET_OP_SUCCESS)
+        {
+            continue;
+        }
+        if(status==SOCKET_OP_BLOCK)
+        {
+            co_await io_listener->await_write();
 
+        }else if(status==SOCKET_OP_CLOSE)
+        {
+            throw std::runtime_error("Socket wrtie(): Socket has been closed");
+        }
+    }
 }
 
 AwaitableFuture Socket::flush()

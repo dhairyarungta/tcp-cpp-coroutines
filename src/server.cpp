@@ -21,6 +21,14 @@ Future Server::run_server_loop()
     {
         while(!market_for_close)
         {
+            std::shared_ptr<Socket> socket = co_await server_socket.accept_conn();
+            thread_pool.run([&, socket_ptr = std::move(socket)] 
+            {
+                server_app.handle_socket(
+                    *this,
+                    std::move(socket_ptr)
+                );
+            });
 
         }
     }

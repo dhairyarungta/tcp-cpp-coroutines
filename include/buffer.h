@@ -20,7 +20,7 @@ private :
     long long get_index (long long p);
     bool has_wrap_around();
 public:
-    ByteBuffer(long long int max_capacity);
+    ByteBuffer(long long  max_capacity);
     ~ByteBuffer();
     IOChunk get_read_chunk();
     IOChunk get_write_chunk();

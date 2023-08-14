@@ -53,7 +53,7 @@ IOChunk ByteBuffer::get_read_chunk()
 
 
 
-void ByteBuffer::increment_read_pointer(long long size)
+void ByteBuffer::increment_write_pointer(long long size)
 {
     if(size>get_total_capacity())
     {
@@ -79,7 +79,7 @@ void ByteBuffer::read(std::byte* dest, long long size)
         size-=read_size;
         dest+=read_size;
         increment_read_pointer(read_size);
-        
+
     }
     
 }

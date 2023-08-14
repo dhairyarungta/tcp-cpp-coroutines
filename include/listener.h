@@ -30,7 +30,7 @@ public :
     IoEventListener(ThreadPool& thread_pool, int epoll_fd, int io_fd);
     ~IoEventListener();
     void on_event(bool can_read, bool can_write);
-    void set_read_hanlde(std::coroutine_handle<>read_handle);
+    void set_read_handle(std::coroutine_handle<>read_handle);
     void set_write_handle(std::coroutine_handle<>write_handle);
     IoReadAwaiter await_read();
     IoWriteAwaiter await_write();

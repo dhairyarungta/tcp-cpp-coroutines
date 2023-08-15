@@ -8,7 +8,7 @@
 #include <unistd.h>
 
 IoEventMonitor::IoEventMonitor(ThreadPool& thread_pool)
-    :thread_pool_(thread_pool)
+    :thread_pool(thread_pool)
 {
     is_shutdown = false;
     epoll_fd = epoll_create(1);
@@ -34,6 +34,7 @@ void IoEventMonitor::run()
         trigger_events(events.data(), count);
     }
 }
+
 void IoEventMonitor::shutdown()
 {
     if(is_shutdown.exchange(true))

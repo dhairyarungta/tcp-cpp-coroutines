@@ -23,13 +23,13 @@ class Socket
 private :
     SocketDetails details;
     IoEventMonitor& io_monitor;
-    IoEventListener& io_listener;
+    IoEventListener* io_listener;
     SocketStream stream;
     ByteBuffer input_buffer;
     ByteBuffer output_buffer;
     std::atomic_bool is_close;
     void read_available(std::byte* &dest, long long & size, long long &total_read);
-    void skip_available(long long &size, long lnog &total_skipped);
+    void skip_available(long long &size, long long &total_skipped);
     void write_availble(const std::byte* &src, long long &size);
 
 public :

@@ -28,7 +28,7 @@ addrinfo* get_local_addr_info(short port)
 ServerSocket::ServerSocket(short port, IoEventMonitor& io_monitor) 
     :io_monitor(io_monitor),is_closed(false)
 {
-    addrinfo* info = get_local_addrinfo(port);
+    addrinfo* info = get_local_addr_info(port);
     socket_fd = socket(info->ai_family, info->ai_socktype, info->ai_protocol);
     throw_errno(socket_fd, "ServerSocket socket()");
     int status = bind(socket_fd, info->ai_addr, info->ai_addrlen);

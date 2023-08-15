@@ -5,12 +5,12 @@
 #include <sys/epoll.h>
 
 
-IoEventListener::IoEventListener(ThreadPool& threadPool, int epoll_fd, int io_fd)
+IoEventListener::IoEventListener(ThreadPool& thread_pool , int epoll_fd, int io_fd)
     :thread_pool(thread_pool), epoll_fd(epoll_fd), io_fd(io_fd), marked_for_close(false),
     listening_read(false), listening_write(false)
 {
     epoll_event  e_event;
-    e_event.data.fd = io_data;
+    e_event.data.fd = io_fd;
     int status = epoll_ctl(epoll_fd, EPOLL_CTL_ADD, io_fd, &e_event);
     throw_errno(status,"IoEventListener constructor error: ");
 }
@@ -83,7 +83,7 @@ void IoEventListener::on_event(bool can_read , bool can_write)
     listening_read = false;
     listener_write = false;
     bool need_read = run_handle(read_handle_opt, can_read);
-    bool need_write = run_handle(write_handle_opt, can_write);
+    bool need_write = run_handle(write_handle_opt, can_write)
     listen_for_event(need_read, need_write);
 
 }

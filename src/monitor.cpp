@@ -59,6 +59,7 @@ void IoEventMonitor::remove_fd(int fd)
 {
     std::lock_guard<std::mutex> guard(fd_mutex);
     fd_listener_map.erase(fd);
+    //TODO : remove fd of from the epoll fd
 }   
 void IoEventMonitor::trigger_events(epoll_event*events, int count)
 {

@@ -12,14 +12,14 @@
 Server::Server(short port , ServerApplication& server_app, IoEventMonitor&io_monitor, ThreadPool& thread_pool)
     :server_socket(port, io_monitor), server_app(server_app), io_monitor(io_monitor), thread_pool(thread_pool)
 {
-    this->market_for_close= false;
+    this->marked_for_close= false;
 }    
 
 Future Server::run_server_loop()
 {
     try
     {
-        while(!market_for_close)
+        while(!marked_for_close)
         {
             std::shared_ptr<Socket> socket = co_await server_socket.accept_conn();
             thread_pool.run([&, socket_ptr = std::move(socket)] 
@@ -51,7 +51,7 @@ void Server::start()
 
 void Server::shutdown()
 {
-    if(market_for_close.exchange(true))
+    if(marked_for_close.exchange(true))
     {
         throw std::runtime_error(std::string("Server::shutdown() error: Server already shutdown"));
 

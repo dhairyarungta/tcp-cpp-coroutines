@@ -46,7 +46,7 @@ ServerSocket::ServerSocket(short port, IoEventMonitor& io_monitor)
 AwaitableValue<std::shared_ptr<Socket>> ServerSocket::accept_conn()
 {
     SocketDetails details;
-    whiel(true)
+    while(true)
     {
         details.socket_fd = accept(socket_fd, reinterpret_cast<sockaddr*>(&details.client_addr),&details.addr_size);
 
